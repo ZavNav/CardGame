@@ -10,6 +10,7 @@ public class UIManager : MonoBehaviour
     private TextMeshProUGUI _scoreText;
     private Button _continue;
     private Button _pause;
+    private Button _next;
     private readonly List<Button> _toMain = new List<Button>();
     private TextMeshProUGUI _scoreTotal, _pairsTotal;
 
@@ -26,6 +27,7 @@ public class UIManager : MonoBehaviour
         
         _pause = GameObject.Find("Pause").GetComponent<Button>();
         _continue = GameObject.Find("Continue").GetComponent<Button>();
+        _next = GameObject.Find("Next").GetComponent<Button>();
         _toMain.Add(GameObject.Find("ResultPanel/ToMain").GetComponent<Button>());
         _toMain.Add(GameObject.Find("PauseMenu/ToMain").GetComponent<Button>());
         _pairsTotal = GameObject.Find("ResultPanel/TotalPairs").GetComponent<TextMeshProUGUI>();
@@ -51,6 +53,10 @@ public class UIManager : MonoBehaviour
         {
             Time.timeScale = 1;
             GameManager.Gm.GameState = GameManager.gameState.play;
+        });
+        _next.onClick.AddListener(() =>
+        {
+            SceneManager.LoadScene("SampleScene");
         });
         foreach (var item in _toMain)
         {

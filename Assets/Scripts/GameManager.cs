@@ -37,6 +37,7 @@ public class GameManager : MonoBehaviour
     
     void Awake()
     {
+        Time.timeScale = 1;
         GameState = gameState.play;
         SetHash();
     }
@@ -60,10 +61,10 @@ public class GameManager : MonoBehaviour
         _canvasTransform = FindObjectOfType<Canvas>().transform;
         _numberPref = Resources.Load<Number>("NumberPref");
     }
-    public float GetCameraVerticalSize()
+    /*public float GetCameraVerticalSize()
     {
         return _cam.orthographicSize * 2;
-    }
+    }*/
 
     public float GetCameraLeftBorder()
     {

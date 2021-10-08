@@ -16,12 +16,12 @@ public class Background : MonoBehaviour
     }
 
     public bgType BgType;
-   
+    private static GameObject _bgParent;
+    
     void Start()
     {
-        float cameraSize = GameManager.Gm.GetCameraVerticalSize();
-        transform.localScale = new Vector3(cameraSize / 10, cameraSize / 10, 1);
-
+       // float cameraSize = GameManager.Gm.GetCameraVerticalSize();
+       // transform.localScale = new Vector3(cameraSize / 10, cameraSize / 10, 1);
         switch (BgType)
         {
             case bgType.cloud:
