@@ -33,25 +33,30 @@ public class GameManager : MonoBehaviour
 
     public UnityEvent onPairChecked = new UnityEvent();
     public int Score;
-    public int _pairs;
+    public int pairs;
+    public int level = 1;
     
     void Awake()
     {
         Time.timeScale = 1;
         GameState = gameState.play;
+        if (PlayerPrefs.GetString("gameMode") != "save")
+        {
+            _maxNumbers *= Mathf.FloorToInt(level / 5);
+        }
         SetHash();
     }
 
     private void Start()
     {
-        SaveManager.LoadSave(ref Score, ref _pairs);
+        SaveManager.LoadSave(ref Score, ref pairs, ref level);
         onScoreUpdate?.Invoke(Score);
         StartSpawn();
     }
 
     private void OnApplicationQuit()
     {
-        SaveManager.CreateOrRewriteSave(ref Score, ref _pairs);
+        SaveManager.CreateOrRewriteSave(ref Score, ref pairs, ref level);
     }
 
     private void SetHash()
@@ -128,7 +133,7 @@ public class GameManager : MonoBehaviour
         if ((nums || sum) && objs)
         {
             Score += 10;
-            _pairs++;
+            pairs++;
             _numbersCounter-=2;
             onScoreUpdate?.Invoke(Score);
             foreach (var item in _pair)
@@ -139,7 +144,8 @@ public class GameManager : MonoBehaviour
             if (_numbersCounter == 0)
             {
                 onAllPairsMatched?.Invoke();
-                SaveManager.CreateOrRewriteSave(ref Score, ref _pairs);
+                if (PlayerPrefs.GetString("gameMode") != "save") level++;
+                SaveManager.CreateOrRewriteSave(ref Score, ref pairs, ref level);
             }
         }
         _pair.Clear();

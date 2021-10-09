@@ -14,10 +14,14 @@ public class UIManager : MonoBehaviour
     private readonly List<Button> _toMain = new List<Button>();
     private TextMeshProUGUI _scoreTotal, _pairsTotal;
 
+    private TextMeshProUGUI _timer;
+    private int _seconds = 59, _minutes = 1;
+
     private void Awake()
     {
         SetHash();
         SetListeners();
+        if (PlayerPrefs.GetString("gameMode") != "save") StartCoroutine(Timer());
     }
 
     private void SetHash()
@@ -32,17 +36,53 @@ public class UIManager : MonoBehaviour
         _toMain.Add(GameObject.Find("PauseMenu/ToMain").GetComponent<Button>());
         _pairsTotal = GameObject.Find("ResultPanel/TotalPairs").GetComponent<TextMeshProUGUI>();
         _scoreTotal = GameObject.Find("ResultPanel/TotalScore").GetComponent<TextMeshProUGUI>();
-        
+
+        _timer = GameObject.Find("Timer").GetComponent<TextMeshProUGUI>();
+        _timer.gameObject.SetActive(PlayerPrefs.GetString("gameMode") != "save");
+            
         _continue.transform.parent.gameObject.SetActive(false);
         _scoreTotal.transform.parent.gameObject.SetActive(false);
+    }
+
+    private IEnumerator Timer()
+    {
+        while (_timer.text != "00:00")
+        {
+            if (_seconds == 0)
+            {
+                _minutes--;
+                yield return new WaitForSeconds(1);
+                _seconds = 59;
+                _timer.text = _minutes.ToString("00") + ":" + _seconds.ToString("00");
+            }
+            yield return new WaitForSeconds(1);
+            _seconds--;
+            _timer.text = _minutes.ToString("00") + ":" + _seconds.ToString("00");
+        }
+        TimeOver();
+    }
+
+    private void TimeOver()
+    {
+        SaveManager.RemoveSaves();
+        Time.timeScale = 0;
+        var resultPanel = _scoreTotal.transform.parent.gameObject;
+        resultPanel.SetActive(true);
+        resultPanel.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "YOU LOSE";
+        resultPanel.transform.GetChild(3).GetComponentInChildren<TextMeshProUGUI>().text = "RESTART";
+        _scoreTotal.text = $"Total Score: {GameManager.Gm.Score.ToString()}";
+        _pairsTotal.text = $"Total matched pairs: {GameManager.Gm.pairs.ToString()}";
+        GameManager.Gm.Score = 0;
+        GameManager.Gm.pairs = 0;
     }
     private void SetListeners()
     {
         GameManager.Gm.onAllPairsMatched.AddListener(() =>
         {
+            Time.timeScale = 0;
             _scoreTotal.transform.parent.gameObject.SetActive(true);
             _scoreTotal.text = $"Total Score: {GameManager.Gm.Score.ToString()}";
-            _pairsTotal.text = $"Total matched pairs: {GameManager.Gm._pairs.ToString()}";
+            _pairsTotal.text = $"Total matched pairs: {GameManager.Gm.pairs.ToString()}";
         });
         _pause.onClick.AddListener(() => 
         { 
@@ -56,11 +96,18 @@ public class UIManager : MonoBehaviour
         });
         _next.onClick.AddListener(() =>
         {
+            SaveManager.CreateOrRewriteSave(ref GameManager.Gm.Score, ref GameManager.Gm.pairs,
+                ref GameManager.Gm.level);
             SceneManager.LoadScene("SampleScene");
         });
         foreach (var item in _toMain)
         {
-            item.onClick.AddListener(() => { SceneManager.LoadScene("Main"); });
+            item.onClick.AddListener(() =>
+            {
+                SaveManager.CreateOrRewriteSave(ref GameManager.Gm.Score, ref GameManager.Gm.pairs,
+                    ref GameManager.Gm.level);
+                SceneManager.LoadScene("Main"); 
+            });
         }
     }
     private void UpdateScoreText(int score)

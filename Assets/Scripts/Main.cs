@@ -7,4 +7,9 @@ public class Main : MonoBehaviour
     {
         SceneManager.LoadScene("SampleScene");
     }
+
+    public void SetMode(string mode)
+    {
+        PlayerPrefs.SetString("gameMode", mode);
+    }
 }
